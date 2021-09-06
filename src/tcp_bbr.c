@@ -130,11 +130,11 @@ struct bbr {
 /* Window length of bw filter (in rounds): */
 static const int bbr_bw_rtts = CYCLE_LEN + 2;
 /* Window length of min_rtt filter (in sec): */
-static const u32 bbr_min_rtt_win_sec = 10;
+static const u32 bbr_min_rtt_win_sec = 16;
 /* Minimum time (in ms) spent at bbr_cwnd_min_target in BBR_PROBE_RTT mode: */
-static const u32 bbr_probe_rtt_mode_ms = 200;
+static const u32 bbr_probe_rtt_mode_ms = 56;
 /* Skip TSO below the following bandwidth (bits/sec): */
-static const int bbr_min_tso_rate = 1200000;
+static const int bbr_min_tso_rate = 32768000;
 
 /* Pace at ~1% below estimated bw, on average, to reduce queue at bottleneck.
  * In order to help drive the network toward lower queues and low latency while
@@ -153,15 +153,15 @@ static const int bbr_high_gain  = BBR_UNIT * 2885 / 1000 + 1;
 /* The pacing gain of 1/high_gain in BBR_DRAIN is calculated to typically drain
  * the queue created in BBR_STARTUP in a single round:
  */
-static const int bbr_drain_gain = BBR_UNIT * 1000 / 2885;
+static const int bbr_drain_gain = BBR_UNIT * 1000 / (2885 * 1.5);
 /* The gain for deriving steady-state cwnd tolerates delayed/stretched ACKs: */
 static const int bbr_cwnd_gain  = BBR_UNIT * 2;
 /* The pacing_gain values for the PROBE_BW gain cycle, to discover/share bw: */
 static const int bbr_pacing_gain[] = {
-	BBR_UNIT * 5 / 4,	/* probe for more available bw */
-	BBR_UNIT * 3 / 4,	/* drain queue and/or yield bw to other flows */
-	BBR_UNIT, BBR_UNIT, BBR_UNIT,	/* cruise at 1.0*bw to utilize pipe, */
-	BBR_UNIT, BBR_UNIT, BBR_UNIT	/* without creating excess queue... */
+	BBR_UNIT * 16 / 8,	/* probe for more available bw */
+	BBR_UNIT * 7 / 8,	/* drain queue and/or yield bw to other flows */
+	BBR_UNIT * 16 / 8, BBR_UNIT * 14 / 8, BBR_UNIT * 12 / 8,	/* cruise at 1.0*bw to utilize pipe, */
+	BBR_UNIT * 14 / 8, BBR_UNIT * 16 / 8, BBR_UNIT * 14 / 8	/* without creating excess queue... */
 };
 /* Randomize the starting gain cycling phase over N phases: */
 static const u32 bbr_cycle_rand = 7;
@@ -174,7 +174,7 @@ static const u32 bbr_cwnd_min_target = 4;
 
 /* To estimate if BBR_STARTUP mode (i.e. high_gain) has filled pipe... */
 /* If bw has increased significantly (1.25x), there may be more bw available: */
-static const u32 bbr_full_bw_thresh = BBR_UNIT * 5 / 4;
+static const u32 bbr_full_bw_thresh = BBR_UNIT * 8 / 4;
 /* But after 3 rounds w/o significant bw growth, estimate pipe is full: */
 static const u32 bbr_full_bw_cnt = 3;
 
