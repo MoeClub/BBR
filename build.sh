@@ -8,5 +8,5 @@ wget -qO /tmp/tcp_bbr.c "https://github.com/MoeClub/BBR/raw/master/src/$(uname -
 wget -qO /tmp/Makefile "https://github.com/MoeClub/BBR/raw/master/Makefile"
 
 cd /tmp
-make install
+make && make install
 
