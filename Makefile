@@ -8,7 +8,7 @@ clean:
 
 install:
 	cp -rf tcp_bbr.ko /lib/modules/`uname -r`/kernel/net/ipv4
-	insmod /lib/modules/`uname -r`/kernel/net/ipv4/tcp_bbr.ko || true
+	insmod /lib/modules/`uname -r`/kernel/net/ipv4/tcp_bbr.ko 2>/dev/null || true
 	depmod -a
 	sed -i '/net\.core\.default_qdisc/d' /etc/sysctl.conf
 	sed -i '/net\.ipv4\.tcp_congestion_control/d' /etc/sysctl.conf
