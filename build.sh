@@ -1,3 +1,4 @@
+#!/bin/bash
 # ver 4.19
 
 apt update
