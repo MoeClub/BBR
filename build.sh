@@ -1,5 +1,5 @@
 #!/bin/bash
-# ver 4.19
+# ver 4.19, 5.10
 
 apt update
 apt install -y make gcc linux-headers-$(uname -r)
