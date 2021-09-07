@@ -12,7 +12,7 @@ install:
 	depmod -a
 	sed -i '/net\.core\.default_qdisc/d' /etc/sysctl.conf
 	sed -i '/net\.ipv4\.tcp_congestion_control/d' /etc/sysctl.conf
-	while [ -z "$$(sed -n '$$p' /etc/sysctl.conf)" ]; do sed -i '$$d' /etc/sysctl.conf; done
+	while [ -z `sed -n '$$p' /etc/sysctl.conf` ]; do sed -i '$$d' /etc/sysctl.conf; done
 	sed -i '$$a\net.core.default_qdisc = fq\nnet.ipv4.tcp_congestion_control = bbr\n\n' /etc/sysctl.conf
 	sysctl -p
 
@@ -20,5 +20,5 @@ uninstall:
 	rm -rf /lib/modules/`uname -r`/kernel/net/ipv4/tcp_bbr.ko
 	sed -i '/net\.core\.default_qdisc/d' /etc/sysctl.conf
 	sed -i '/net\.ipv4\.tcp_congestion_control/d' /etc/sysctl.conf
-	while [ -z "$$(sed -n '$$p' /etc/sysctl.conf)" ]; do sed -i '$$d' /etc/sysctl.conf; done
+	while [ -z `sed -n '$$p' /etc/sysctl.conf` ]; do sed -i '$$d' /etc/sysctl.conf; done
 	sysctl -p
