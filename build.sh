@@ -1,6 +1,8 @@
 #!/bin/bash
 # ver 4.19, 5.10
 
+[ -f "/lib/modules/$(uname -r)/kernel/net/ipv4/tcp_bbr.ko" ] || exit 1
+
 apt update
 apt install -y make gcc linux-headers-$(uname -r)
 
