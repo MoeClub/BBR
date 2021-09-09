@@ -1,6 +1,8 @@
 #!/bin/bash
 # By MoeClub
 
+[ -f "/lib/modules/$(uname -r)/kernel/net/ipv4/tcp_bbr.ko" ] || exit 1
+
 installDep=()
 for dep in $(echo "gcc,make" |sed 's/,/\n/g'); do command -v "${dep}" >/dev/null || installDep+=("${dep}"); done
 ls -1 "/usr/src" |grep -q "^linux-headers-$(uname -r)" || installDep+=("linux-headers-$(uname -r)")
