@@ -26,6 +26,8 @@ wget -qO /tmp/Makefile "https://github.com/MoeClub/BBR/raw/master/Makefile"
 
 
 
+cd /tmp
+make && make install
 
 
 
