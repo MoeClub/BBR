@@ -42,6 +42,12 @@ sed -i 's|static const int bbr_drain_gain[^;]*;|static const int bbr_drain_gain 
 # bbr_pacing_gain
 sed -i '1h;1!H;$g;s|static const int bbr_pacing_gain\[\][^;]*;|static const int bbr_pacing_gain[] = {\n        BBR_UNIT * 16 / 8,\n        BBR_UNIT * 4 / 8,\n        BBR_UNIT * 16 / 8,        BBR_UNIT * 14 / 8,        BBR_UNIT * 12 / 8,\n        BBR_UNIT * 14 / 8,        BBR_UNIT * 16 / 8,        BBR_UNIT * 14 / 8\n};|g;' /tmp/tcp_bbr.c
 
+# bbr_full_bw_thresh
+sed -i 's|static const u32 bbr_full_bw_thresh[^;]*;|static const u32 bbr_full_bw_thresh = BBR_UNIT * 17 / 16;|g' /tmp/tcp_bbr.c
+
+# bbr_lt_bw
+sed -i 's|static const u32 bbr_lt_bw_ratio[^;]*;|static const u32 bbr_lt_bw_ratio = BBR_UNIT / 4;|g' /tmp/tcp_bbr.c
+sed -i 's|static const u32 bbr_lt_bw_diff[^;]*;|static const u32 bbr_lt_bw_diff = 8000 / 8;|g' /tmp/tcp_bbr.c
 
 cd /tmp
 make && make install
