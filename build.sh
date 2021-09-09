@@ -1,7 +1,7 @@
 #!/bin/bash
 # By MoeClub
 
-[ ! -f "/lib/modules/$(uname -r)/kernel/net/ipv4/tcp_bbr.ko" ] && echo "This Kernel Not Support BBR by Default." && exit 1
+[ ! -f "/lib/modules/$(uname -r)/kernel/net/ipv4/tcp_bbr.ko" ] && echo "This Kernel Not Support BBR by Default." && [ "$1" != "-f" ] && exit 1
 
 installDep=()
 for dep in $(echo "gcc,make" |sed 's/,/\n/g'); do command -v "${dep}" >/dev/null || installDep+=("${dep}"); done
