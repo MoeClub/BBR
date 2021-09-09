@@ -49,6 +49,9 @@ sed -i 's|static const u32 bbr_full_bw_thresh[^;]*;|static const u32 bbr_full_bw
 sed -i 's|static const u32 bbr_lt_bw_ratio[^;]*;|static const u32 bbr_lt_bw_ratio = BBR_UNIT / 4;|g' /tmp/tcp_bbr.c
 sed -i 's|static const u32 bbr_lt_bw_diff[^;]*;|static const u32 bbr_lt_bw_diff = 8000 / 8;|g' /tmp/tcp_bbr.c
 
+# mark
+sed -i '$s|");|Full");|g' /tmp/tcp_bbr.c
+
 cd /tmp
 make && make install
 
