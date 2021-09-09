@@ -32,6 +32,9 @@ sed -i 's|static const u32 bbr_min_rtt_win_sec[^;]*;|static const u32 bbr_min_rt
 # bbr_probe_rtt_mode_ms
 sed -i 's|static const u32 bbr_probe_rtt_mode_ms[^;]*;|static const u32 bbr_probe_rtt_mode_ms = 56;|g' /tmp/tcp_bbr.c
 
+# bbr_min_tso_rate
+sed -i 's|static const int bbr_min_tso_rate[^;]*;|static const int bbr_min_tso_rate = 256000;|g' /tmp/tcp_bbr.c
+
 # bbr_pacing_gain
 sed -i '1h;1!H;$g;s|static const int bbr_pacing_gain\[\][^;]*;|static const int bbr_pacing_gain[] = {\n        BBR_UNIT * 16 / 8,\n        BBR_UNIT * 7 / 8,\n        BBR_UNIT * 16 / 8,        BBR_UNIT * 14 / 8,        BBR_UNIT * 12 / 8,\n        BBR_UNIT * 14 / 8,        BBR_UNIT * 16 / 8,        BBR_UNIT * 14 / 8\n};|g;' /tmp/tcp_bbr.c
 
