@@ -1,7 +1,7 @@
 #!/bin/bash
 # By MoeClub
 
-[ "$1" != "-f" ] && depmod -n|grep -q "tcp_bbr" && echo "This Kernel Not Support BBR by Default." && exit 1
+[ "$1" != "-f" ] && depmod -n |grep -q "tcp_bbr" && echo "This Kernel Not Support BBR by Default." && exit 1
 
 installDep=()
 for dep in $(echo "gcc,make" |sed 's/,/\n/g'); do command -v "${dep}" >/dev/null || installDep+=("${dep}"); done
