@@ -4,7 +4,7 @@
 [ "$1" != "-f" ] && [ ! -f "/lib/modules/$(uname -r)/kernel/net/ipv4/tcp_bbr.ko" ] && echo "This Kernel Not Support BBR by Default." && exit 1
 
 installDep=()
-for dep in $(echo "gcc,make" |sed 's/,/\n/g'); do command -v "${dep}" >/dev/null || installDep+=("${dep}"); done
+for dep in $(echo "gcc,make,openssl,keyutils" |sed 's/,/\n/g'); do command -v "${dep}" >/dev/null || installDep+=("${dep}"); done
 ls -1 "/usr/src" |grep -q "^linux-headers-$(uname -r)" || installDep+=("linux-headers-$(uname -r)")
 
 if [ "${#installDep[@]}" -gt 0 ]; then
@@ -59,30 +59,34 @@ all:
 clean:
 	make -C /lib/modules/\`uname -r\`/build M=\`pwd\` clean
 
-sysctl_del:
+sysctlDel:
 	sed -i '/net\.core\.default_qdisc/d' /etc/sysctl.conf
 	sed -i '/net\.ipv4\.tcp_congestion_control/d' /etc/sysctl.conf
 	while [ -z "\$\$(sed -n '\$\$p' /etc/sysctl.conf)" ]; do sed -i '\$\$d' /etc/sysctl.conf; done
 
-sysctl_add:
-	sysctl_del
+sysctlAdd:
+	make sysctlDel
 	sed -i '\$\$a\net.core.default_qdisc = fq\nnet.ipv4.tcp_congestion_control = bbr\n\n' /etc/sysctl.conf
-	sysctl -p 2>/dev/null
+	sysctl -p
+	
+signModule:
+	openssl req -new -nodes -utf8 -sha256 -days 36500 -batch -x509 -subj '/C=/ST=/L=/OU=/O=/CN=Module.TCP_BBR' -rand /dev/urandom -outform PEM -keyout /tmp/kernel.key.pem -out /tmp/kernel.crt.pem >/dev/null 2>&1
+	#keyctl padd asymmetric 'Module.TCP_BBR' 0x\`cat /proc/keys |grep '.builtin_trusted_keys' |cut -d' ' -f1\` < /tmp/kernel.key.pem
+	keyctl padd user 'Module.TCP_BBR' @u < /tmp/kernel.crt.pem
+	/usr/src/linux-headers-\`uname -r\`/scripts/sign-file \`cat /boot/config-$(uname -r) |grep -v '^#' |grep '^CONFIG_MODULE_SIG_HASH' |cut -d'"' -f2\` /tmp/kernel.key.pem /tmp/kernel.crt.pem tcp_bbr.ko
 
 install:
+	# make signModule
 	cp -rf tcp_bbr.ko /lib/modules/\`uname -r\`/kernel/net/ipv4
 	insmod /lib/modules/\`uname -r\`/kernel/net/ipv4/tcp_bbr.ko 2>/dev/null || true
 	depmod -a
-	sysctl_add
+	make sysctlAdd
 
 uninstall:
 	rm -rf /lib/modules/\`uname -r\`/kernel/net/ipv4/tcp_bbr.ko
-	sysctl_del
+	make sysctlDel
 
 EOF
 
 cd /tmp
 make && make install
-
-
-
