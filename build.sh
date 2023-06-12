@@ -22,11 +22,6 @@ kernelVer=$(uname -r |cut -d- -f1 |cut -d. -f1-2)
 wget -qO /tmp/tcp_bbr.c "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/plain/net/ipv4/tcp_bbr.c?h=v${kernelVer}"
 [ $? -ne 0 ] && echo "Invalid Kernel Version." && exit 1
 
-# wget -qO /tmp/Makefile "https://github.com/MoeClub/BBR/raw/master/Makefile"
-echo "b2JqLW0gOj0gdGNwX2Jici5vCgphbGw6CgltYWtlIC1DIC9saWIvbW9kdWxlcy9gdW5hbWUgLXJgL2J1aWxkIE09YHB3ZGAgbW9kdWxlcyBDQz1gd2hpY2ggZ2NjYAoJCmNsZWFuOgoJbWFrZSAtQyAvbGliL21vZHVsZXMvYHVuYW1lIC1yYC9idWlsZCBNPWBwd2RgIGNsZWFuCgppbnN0YWxsOgoJY3AgLXJmIHRjcF9iYnIua28gL2xpYi9tb2R1bGVzL2B1bmFtZSAtcmAva2VybmVsL25ldC9pcHY0CglpbnNtb2QgL2xpYi9tb2R1bGVzL2B1bmFtZSAtcmAva2VybmVsL25ldC9pcHY0L3RjcF9iYnIua28gMj4vZGV2L251bGwgfHwgdHJ1ZQoJZGVwbW9kIC1hCglzZWQgLWkgJy9uZXRcLmNvcmVcLmRlZmF1bHRfcWRpc2MvZCcgL2V0Yy9zeXNjdGwuY29uZgoJc2VkIC1pICcvbmV0XC5pcHY0XC50Y3BfY29uZ2VzdGlvbl9jb250cm9sL2QnIC9ldGMvc3lzY3RsLmNvbmYKCXdoaWxlIFsgLXogIiQkKHNlZCAtbiAnJCRwJyAvZXRjL3N5c2N0bC5jb25mKSIgXTsgZG8gc2VkIC1pICckJGQnIC9ldGMvc3lzY3RsLmNvbmY7IGRvbmUKCXNlZCAtaSAnJCRhXG5ldC5jb3JlLmRlZmF1bHRfcWRpc2MgPSBmcVxubmV0LmlwdjQudGNwX2Nvbmdlc3Rpb25fY29udHJvbCA9IGJiclxuXG4nIC9ldGMvc3lzY3RsLmNvbmYKCXN5c2N0bCAtcAoKdW5pbnN0YWxsOgoJcm0gLXJmIC9saWIvbW9kdWxlcy9gdW5hbWUgLXJgL2tlcm5lbC9uZXQvaXB2NC90Y3BfYmJyLmtvCglzZWQgLWkgJy9uZXRcLmNvcmVcLmRlZmF1bHRfcWRpc2MvZCcgL2V0Yy9zeXNjdGwuY29uZgoJc2VkIC1pICcvbmV0XC5pcHY0XC50Y3BfY29uZ2VzdGlvbl9jb250cm9sL2QnIC9ldGMvc3lzY3RsLmNvbmYKCXdoaWxlIFsgLXogIiQkKHNlZCAtbiAnJCRwJyAvZXRjL3N5c2N0bC5jb25mKSIgXTsgZG8gc2VkIC1pICckJGQnIC9ldGMvc3lzY3RsLmNvbmY7IGRvbmUKCXN5c2N0bCAtcAo=" |base64 -d >/tmp/Makefile
-[ $? -ne 0 ] && echo "Invalid Make File." && exit 1
-
-
 # bbr_min_rtt_win_sec
 sed -i 's|static const u32 bbr_min_rtt_win_sec[^;]*;|static const u32 bbr_min_rtt_win_sec = 13;|g' /tmp/tcp_bbr.c
 
@@ -52,6 +47,39 @@ sed -i 's|static const u32 bbr_lt_bw_diff[^;]*;|static const u32 bbr_lt_bw_diff 
 
 # mark
 sed -i 's|^MODULE_DESCRIPTION([^;]*;|MODULE_DESCRIPTION("TCP BBR (Bottleneck Bandwidth and RTT) [SV: '$(date +%Y/%m/%d)' Installed]");|g' /tmp/tcp_bbr.c
+
+
+# makefile
+cat >/tmp/Makefile<<EOF
+obj-m := tcp_bbr.o
+
+all:
+	make -C /lib/modules/\`uname -r\`/build M=\`pwd\` modules CC=\`which gcc\`
+	
+clean:
+	make -C /lib/modules/\`uname -r\`/build M=\`pwd\` clean
+
+sysctl_del:
+	sed -i '/net\.core\.default_qdisc/d' /etc/sysctl.conf
+	sed -i '/net\.ipv4\.tcp_congestion_control/d' /etc/sysctl.conf
+	while [ -z "\$\$(sed -n '\$\$p' /etc/sysctl.conf)" ]; do sed -i '\$\$d' /etc/sysctl.conf; done
+
+sysctl_add:
+	sysctl_del
+	sed -i '\$\$a\net.core.default_qdisc = fq\nnet.ipv4.tcp_congestion_control = bbr\n\n' /etc/sysctl.conf
+	sysctl -p 2>/dev/null
+
+install:
+	cp -rf tcp_bbr.ko /lib/modules/\`uname -r\`/kernel/net/ipv4
+	insmod /lib/modules/\`uname -r\`/kernel/net/ipv4/tcp_bbr.ko 2>/dev/null || true
+	depmod -a
+	sysctl_add
+
+uninstall:
+	rm -rf /lib/modules/\`uname -r\`/kernel/net/ipv4/tcp_bbr.ko
+	sysctl_del
+
+EOF
 
 cd /tmp
 make && make install
