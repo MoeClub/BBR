@@ -20,9 +20,9 @@ kernelVer=$(uname -r |cut -d- -f1 |cut -d. -f1-2)
 [ ! -n "${kernelVer}" ] && echo "No Found Kernel Version." && exit 1
 
 downloadOK=0
-[ "$downloadOK" == "0" ] && wget --no-check-certificate --timeout=10 -qO /tmp/tcp_bbr.c "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/plain/net/ipv4/tcp_bbr.c?h=v${kernelVer}"
-[ $? -eq 0 ] && downloadOK=1
 [ "$downloadOK" == "0" ] && wget --no-check-certificate --timeout=10 -qO /tmp/tcp_bbr.c "https://raw.githubusercontent.com/torvalds/linux/refs/tags/v${kernelVer}/net/ipv4/tcp_bbr.c"
+[ $? -eq 0 ] && downloadOK=1
+[ "$downloadOK" == "0" ] && wget --no-check-certificate --timeout=10 -qO /tmp/tcp_bbr.c "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/plain/net/ipv4/tcp_bbr.c?h=v${kernelVer}"
 [ $? -eq 0 ] && downloadOK=1
 [ "$downloadOK" -ne "1" ] && echo "Invalid Kernel Version." && exit 1
 
