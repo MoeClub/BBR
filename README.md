@@ -1,4 +1,4 @@
-# BBR Build
+# BBR
 ```
 wget --no-check-certificate -qO- 'https://raw.githubusercontent.com/MoeClub/BBR/master/bbr.sh' |sh
 
