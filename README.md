@@ -4,4 +4,10 @@ wget --no-check-certificate -qO- 'https://raw.githubusercontent.com/MoeClub/BBR/
 
 ```
 
+# Kernel
+```
+wget --no-check-certificate -qO- 'https://raw.githubusercontent.com/MoeClub/BBR/master/kernel.sh' |sh
+
+```
+
 
